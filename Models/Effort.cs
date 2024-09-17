@@ -8,10 +8,10 @@
 
         // Foreign key for Employee
         public int EmployeeId { get; set; }
-        public Employee Employee { get; set; }
+        public Employee? Employee { get; set; }
 
         // Foreign key for Project
         public int ProjectId { get; set; }
-        public Project Project { get; set; }
+        public Project? Project { get; set; }
     }
 }

@@ -10,9 +10,9 @@ namespace EforWebApi.Models
         public bool InactiveProjects { get; set; }
 
         // Navigation property for EmployeeProjects
-        public ICollection<EmployeeProject> EmployeeProjects { get; set; }
+        public ICollection<EmployeeProject>? EmployeeProjects { get; set; }
 
         // Navigation property for Efforts
-        public ICollection<Effort> Efforts { get; set; }
+        public ICollection<Effort>? Efforts { get; set; }
     }
 }

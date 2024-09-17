@@ -8,11 +8,11 @@ namespace EforWebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class EffortController : ControllerBase
+    public class EffortControllerr : ControllerBase
     {
         private readonly AppDbContext _context;
 
-        public EffortController(AppDbContext context)
+        public EffortControllerr(AppDbContext context)
         {
             _context = context;
         }

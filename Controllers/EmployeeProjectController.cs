@@ -8,11 +8,11 @@ namespace EforWebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class EmployeeProjectController : ControllerBase
+    public class EmployeeProjectControllerr : ControllerBase
     {
         private readonly AppDbContext _context;
 
-        public EmployeeProjectController(AppDbContext context)
+        public EmployeeProjectControllerr(AppDbContext context)
         {
             _context = context;
         }
