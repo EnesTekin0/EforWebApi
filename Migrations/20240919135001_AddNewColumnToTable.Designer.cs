@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EforWebApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240912085236_AddNewColumnToEmployee")]
-    partial class AddNewColumnToEmployee
+    [Migration("20240919135001_AddNewColumnToTable")]
+    partial class AddNewColumnToTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,7 @@ namespace EforWebApi.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("EforWebApi.Effort", b =>
+            modelBuilder.Entity("EforWebApi.Models.Effort", b =>
                 {
                     b.Property<int>("EffortId")
                         .ValueGeneratedOnAdd()
@@ -33,22 +33,21 @@ namespace EforWebApi.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("EffortId"));
 
-                    b.Property<int>("EmployeeId")
+                    b.Property<DateTime>("EffortDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("EmployeeProjectId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("ProjectId")
-                        .HasColumnType("integer");
+                    b.Property<decimal>("MonthlyEffort")
+                        .HasColumnType("numeric");
 
                     b.HasKey("EffortId");
-
-                    b.HasIndex("EmployeeId");
-
-                    b.HasIndex("ProjectId");
 
                     b.ToTable("Efforts");
                 });
 
-            modelBuilder.Entity("EforWebApi.Employee", b =>
+            modelBuilder.Entity("EforWebApi.Models.Employee", b =>
                 {
                     b.Property<int>("EmployeeId")
                         .ValueGeneratedOnAdd()
@@ -65,7 +64,6 @@ namespace EforWebApi.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Groups")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("HireDate")
@@ -78,9 +76,6 @@ namespace EforWebApi.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("MonthlyEfor")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("text");
@@ -90,7 +85,7 @@ namespace EforWebApi.Migrations
                     b.ToTable("Employees");
                 });
 
-            modelBuilder.Entity("EforWebApi.EmployeeProject", b =>
+            modelBuilder.Entity("EforWebApi.Models.EmployeeProject", b =>
                 {
                     b.Property<int>("EmployeeProjectId")
                         .ValueGeneratedOnAdd()
@@ -98,21 +93,17 @@ namespace EforWebApi.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("EmployeeProjectId"));
 
-                    b.Property<decimal>("Amount")
+                    b.Property<decimal>("EffortAmount")
                         .HasColumnType("numeric");
 
-                    b.Property<DateTime>("EfforDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<decimal>("EffortGoals")
+                        .HasColumnType("numeric");
 
                     b.Property<int>("EmployeeId")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Goals")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<int>("ProjectId")
                         .HasColumnType("integer");
@@ -122,14 +113,10 @@ namespace EforWebApi.Migrations
 
                     b.HasKey("EmployeeProjectId");
 
-                    b.HasIndex("EmployeeId");
-
-                    b.HasIndex("ProjectId");
-
                     b.ToTable("EmployeeProjects");
                 });
 
-            modelBuilder.Entity("EforWebApi.Project", b =>
+            modelBuilder.Entity("EforWebApi.Models.Project", b =>
                 {
                     b.Property<int>("ProjectId")
                         .ValueGeneratedOnAdd()
@@ -153,58 +140,6 @@ namespace EforWebApi.Migrations
                     b.HasKey("ProjectId");
 
                     b.ToTable("Projects");
-                });
-
-            modelBuilder.Entity("EforWebApi.Effort", b =>
-                {
-                    b.HasOne("EforWebApi.Employee", "Employee")
-                        .WithMany("Efforts")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("EforWebApi.Project", "Project")
-                        .WithMany("Efforts")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Employee");
-
-                    b.Navigation("Project");
-                });
-
-            modelBuilder.Entity("EforWebApi.EmployeeProject", b =>
-                {
-                    b.HasOne("EforWebApi.Employee", "Employee")
-                        .WithMany("EmployeeProjects")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("EforWebApi.Project", "Project")
-                        .WithMany("EmployeeProjects")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Employee");
-
-                    b.Navigation("Project");
-                });
-
-            modelBuilder.Entity("EforWebApi.Employee", b =>
-                {
-                    b.Navigation("Efforts");
-
-                    b.Navigation("EmployeeProjects");
-                });
-
-            modelBuilder.Entity("EforWebApi.Project", b =>
-                {
-                    b.Navigation("Efforts");
-
-                    b.Navigation("EmployeeProjects");
                 });
 #pragma warning restore 612, 618
         }

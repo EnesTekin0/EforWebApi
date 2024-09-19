@@ -10,25 +10,25 @@ namespace EforWebApi.Controllers
     [ApiController]
     public class EmployeeController : ControllerBase
     {
-        private readonly AppDbContext _appdbcontext;
+        private readonly AppDbContext _context;
 
         public EmployeeController(AppDbContext appdbcontext)
         {
-            _appdbcontext = appdbcontext;
+            _context = appdbcontext;
         }
 
         // GET: api/Employee
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees()
         {
-            return await _appdbcontext.Employees.ToListAsync();
+            return await _context.Employees.ToListAsync();
         }
 
         // GET: api/Employee/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Employee>> GetEmployee(int id)
         {
-            var employee = await _appdbcontext.Employees.FindAsync(id);
+            var employee = await _context.Employees.FindAsync(id);
 
             if (employee == null)
             {
@@ -39,6 +39,20 @@ namespace EforWebApi.Controllers
         }
 
         // POST: api/Employee
+        [HttpPost]
+        public async Task<ActionResult<Employee>> PostEmployee([FromBody] Employee employee)
+        {
+            if (employee == null)
+            {
+                return BadRequest("Employee data is null.");
+            }
+
+            _context.Employees.Add(employee);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetEmployee), new { id = employee.EmployeeId }, employee);
+        }
+
         //[HttpPost]
         //public async Task<ActionResult<Employee>> PostEmployee(Employee employee)
         //{
@@ -61,20 +75,6 @@ namespace EforWebApi.Controllers
 
         //    return CreatedAtAction("GetEmployee", new { id = employee.EmployeeId }, employee);
         //}
-        [HttpPost]
-        public async Task<ActionResult<Employee>> PostEmployee([FromBody] Employee employee)
-        {
-            if (employee == null)
-            {
-                return BadRequest("Employee data is null.");
-            }
-
-            _appdbcontext.Employees.Add(employee);
-            await _appdbcontext.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetEmployee), new { id = employee.EmployeeId }, employee);
-        }
-
 
         // PUT: api/Employee/5
         [HttpPut("{id}")]
@@ -85,11 +85,11 @@ namespace EforWebApi.Controllers
                 return BadRequest();
             }
 
-            _appdbcontext.Entry(employee).State = EntityState.Modified;
+            _context.Entry(employee).State = EntityState.Modified;
 
             try
             {
-                await _appdbcontext.SaveChangesAsync();
+                await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -110,21 +110,21 @@ namespace EforWebApi.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEmployee(int id)
         {
-            var employee = await _appdbcontext.Employees.FindAsync(id);
+            var employee = await _context.Employees.FindAsync(id);
             if (employee == null)
             {
                 return NotFound();
             }
 
-            _appdbcontext.Employees.Remove(employee);
-            await _appdbcontext.SaveChangesAsync();
+            _context.Employees.Remove(employee);
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
         private bool EmployeeExists(int id)
         {
-            return _appdbcontext.Employees.Any(e => e.EmployeeId == id);
+            return _context.Employees.Any(e => e.EmployeeId == id);
         }
     }
 }

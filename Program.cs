@@ -5,8 +5,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Servisleri ekleyelim (DbContext, Controller vb.)
 builder.Services.AddControllers();
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("AppDbContext")));
+
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();

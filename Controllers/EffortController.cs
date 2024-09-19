@@ -40,7 +40,7 @@ namespace EforWebApi.Controllers
 
         // POST: api/Effort
         [HttpPost]
-        public async Task<ActionResult<Effort>> PostEffort(Effort effort)
+        public async Task<ActionResult<Effort>> PostEffort(Effort effort) //DTO
         {
             _context.Efforts.Add(effort);
             await _context.SaveChangesAsync();
