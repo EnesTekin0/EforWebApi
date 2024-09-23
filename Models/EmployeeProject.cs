@@ -12,14 +12,11 @@ namespace EforWebApi.Models
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
 
-        ////Navigation property for EmployeeProjects 
-        //public virtual ICollection<Effort> Effort { get; set; } = new List<Effort>();
+        public virtual ICollection<Effort> Effort { get; set; } = new List<Effort>();
 
-        //// Foreign key for EmployeeProject 
-        //[ForeignKey("EmployeeId")]
-        //public virtual Employee Employee { get; set; }
-
-        //[ForeignKey("ProjectId")]
-        //public virtual Project Project { get; set; }
+        [ForeignKey("EmployeeId")]
+        public virtual Employee? Employee { get; set; } 
+        [ForeignKey("ProjectId")]
+        public virtual Project? Project { get; set; }
     }
 }

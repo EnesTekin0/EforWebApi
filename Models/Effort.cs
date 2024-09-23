@@ -9,7 +9,7 @@ namespace EforWebApi.Models
         public DateTime EffortDate { get; set; }
         public decimal MonthlyEffort { get; set; }
 
-        //[ForeignKey("EmployeeProjectId")]
-        //public virtual EmployeeProject EmployeeProject { get; set; }
+        [ForeignKey("EmployeeProjectId")]
+        public virtual EmployeeProject? EmployeeProject { get; set; }
     }
 }

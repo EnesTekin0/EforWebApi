@@ -9,7 +9,6 @@ namespace EforWebApi.Models
         public DateTime EndDate { get; set; }
         public bool InactiveProjects { get; set; }
 
-        ////Navigation property for EmployeeProjects  Çalışıyor
-        //public virtual ICollection<EmployeeProject> EmployeeProjects { get; set; } = new List<EmployeeProject>();
+        public virtual ICollection<EmployeeProject> EmployeeProjects { get; set; } = new List<EmployeeProject>();
     }
 }

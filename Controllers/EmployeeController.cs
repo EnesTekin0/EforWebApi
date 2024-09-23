@@ -3,6 +3,7 @@ using EforWebApi.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using EforWebApi.DTO;
 
 namespace EforWebApi.Controllers
 {
@@ -21,6 +22,10 @@ namespace EforWebApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees()
         {
+            if (_context.Employees == null)
+            {
+                return NotFound();
+            }
             return await _context.Employees.ToListAsync();
         }
 
@@ -28,6 +33,10 @@ namespace EforWebApi.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Employee>> GetEmployee(int id)
         {
+            if (_context.Employees == null)
+            {
+                return NotFound();
+            }
             var employee = await _context.Employees.FindAsync(id);
 
             if (employee == null)
@@ -40,52 +49,43 @@ namespace EforWebApi.Controllers
 
         // POST: api/Employee
         [HttpPost]
-        public async Task<ActionResult<Employee>> PostEmployee([FromBody] Employee employee)
+        public async Task<ActionResult<Employee>> PostEmployee(EmployeeDto employeeDto)
         {
-            if (employee == null)
+            if (employeeDto == null)
             {
                 return BadRequest("Employee data is null.");
             }
-
-            _context.Employees.Add(employee);
+            var result = _context.Employees.Add(new Employee {
+                FirstName = employeeDto.FirstName,
+                LastName = employeeDto.LastName,
+                Email = employeeDto.Email,
+                Password = employeeDto.Password,
+                Groups = employeeDto.Groups,
+                HireDate = employeeDto.HireDate,
+                InactiveEmployees = employeeDto.InactiveEmployees
+            });
             await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetEmployee), new { id = employee.EmployeeId }, employee);
+            return Ok(result.Entity);
         }
-
-        //[HttpPost]
-        //public async Task<ActionResult<Employee>> PostEmployee(Employee employee)
-        //{
-        //    _context.Employees.Add(employee);
-        //    await _context.SaveChangesAsync();
-
-        //    return CreatedAtAction("GetEmployee", new { id = employee.EmployeeId }, employee);
-        //}
-
-        //[HttpPost]
-        //public async Task<IActionResult> Create([FromBody] Employee employee)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
-
-        //    _context.Employees.Add(employee);
-        //    await _context.SaveChangesAsync();
-
-        //    return CreatedAtAction("GetEmployee", new { id = employee.EmployeeId }, employee);
-        //}
 
         // PUT: api/Employee/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutEmployee(int id, Employee employee)
+        public async Task<IActionResult> PutEmployee(int id, EmployeeDto employeeDto)
         {
-            if (id != employee.EmployeeId)
+            var employee = await _context.Employees.FindAsync(id);
+
+            if (employee == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
-            _context.Entry(employee).State = EntityState.Modified;
+            employee.FirstName = employeeDto.FirstName;
+            employee.LastName = employeeDto.LastName;
+            employee.Email = employeeDto.Email;
+            employee.Password = employeeDto.Password;
+            employee.Groups = employeeDto.Groups;
+            employee.HireDate = employeeDto.HireDate;
+            employee.InactiveEmployees = employeeDto.InactiveEmployees;
 
             try
             {
@@ -93,7 +93,7 @@ namespace EforWebApi.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!EmployeeExists(id))
+                if (!_context.Employees.Any(e => e.EmployeeId == id))
                 {
                     return NotFound();
                 }
@@ -102,7 +102,6 @@ namespace EforWebApi.Controllers
                     throw;
                 }
             }
-
             return NoContent();
         }
 
@@ -121,7 +120,6 @@ namespace EforWebApi.Controllers
 
             return NoContent();
         }
-
         private bool EmployeeExists(int id)
         {
             return _context.Employees.Any(e => e.EmployeeId == id);

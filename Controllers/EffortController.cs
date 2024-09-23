@@ -3,6 +3,7 @@ using EforWebApi.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using EforWebApi.DTO;
 
 namespace EforWebApi.Controllers
 {
@@ -21,6 +22,10 @@ namespace EforWebApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Effort>>> GetEfforts()
         {
+            if (_context.Efforts == null)
+            {
+                return NotFound();
+            }
             return await _context.Efforts.ToListAsync();
         }
 
@@ -28,6 +33,10 @@ namespace EforWebApi.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Effort>> GetEffort(int id)
         {
+            if (_context.Efforts == null)
+            {
+                return NotFound();
+            }
             var effort = await _context.Efforts.FindAsync(id);
 
             if (effort == null)
@@ -40,24 +49,36 @@ namespace EforWebApi.Controllers
 
         // POST: api/Effort
         [HttpPost]
-        public async Task<ActionResult<Effort>> PostEffort(Effort effort) //DTO
+        public async Task<ActionResult<Effort>> PostEffort(EffortDto effortDto)
         {
-            _context.Efforts.Add(effort);
+            if (effortDto == null)
+            {
+                return BadRequest("Employee data is null.");
+            }
+            var result=_context.Efforts.Add(new Effort 
+            {
+                 EffortDate=effortDto.EffortDate,
+                 MonthlyEffort=effortDto.MonthlyEffort,
+                 EmployeeProjectId=effortDto.EmployeeProjectId 
+             });
             await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetEffort", new { id = effort.EffortId }, effort);
+            return Ok(result.Entity);
         }
 
         // PUT: api/Effort/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutEffort(int id, Effort effort)
+        public async Task<IActionResult> PutEffort(int id, EffortDto effortDto)
         {
-            if (id != effort.EffortId)
+            var effort = await _context.Efforts.FindAsync(id);
+
+            if (effort == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
-            _context.Entry(effort).State = EntityState.Modified;
+            effort.EffortDate = effortDto.EffortDate;
+            effort.MonthlyEffort = effortDto.MonthlyEffort;
+            effort.EmployeeProjectId = effortDto.EmployeeProjectId;
 
             try
             {
@@ -65,7 +86,7 @@ namespace EforWebApi.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!EffortExists(id))
+                if (!_context.Efforts.Any(e => e.EffortId == id))
                 {
                     return NotFound();
                 }
@@ -74,7 +95,6 @@ namespace EforWebApi.Controllers
                     throw;
                 }
             }
-
             return NoContent();
         }
 

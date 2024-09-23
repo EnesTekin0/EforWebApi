@@ -3,6 +3,7 @@ using EforWebApi.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using EforWebApi.DTO;
 
 namespace EforWebApi.Controllers
 {
@@ -21,6 +22,10 @@ namespace EforWebApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Project>>> GetProjects()
         {
+            if (_context.Projects == null)
+            {
+                return NotFound();
+            }
             return await _context.Projects.ToListAsync();
         }
 
@@ -28,6 +33,10 @@ namespace EforWebApi.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Project>> GetProject(int id)
         {
+            if (_context.Projects == null)
+            {
+                return NotFound();
+            }
             var project = await _context.Projects.FindAsync(id);
 
             if (project == null)
@@ -40,24 +49,38 @@ namespace EforWebApi.Controllers
 
         // POST: api/Project
         [HttpPost]
-        public async Task<ActionResult<Project>> PostProject(Project project)
+        public async Task<ActionResult<Project>> PostProject(ProjectDto projectDto)
         {
-            _context.Projects.Add(project);
+            if (projectDto == null)
+            {
+                return BadRequest("Employee data is null.");
+            }
+            var result = _context.Projects.Add(new Project
+            {
+                ProjectName = projectDto.ProjectName,
+                StartDate = projectDto.StartDate,
+                EndDate = projectDto.EndDate,
+                InactiveProjects = projectDto.InactiveProjects
+            });
             await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetProject", new { id = project.ProjectId }, project);
+            return Ok(result.Entity);
         }
 
         // PUT: api/Project/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProject(int id, Project project)
+        public async Task<IActionResult> PutProject(int id, ProjectDto projectDto)
         {
-            if (id != project.ProjectId)
+            var project = await _context.Projects.FindAsync(id);
+
+            if (project == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
-            _context.Entry(project).State = EntityState.Modified;
+            project.ProjectName = projectDto.ProjectName;
+            project.StartDate = projectDto.StartDate;
+            project.EndDate = projectDto.EndDate;
+            project.InactiveProjects = projectDto.InactiveProjects;
 
             try
             {
@@ -65,7 +88,7 @@ namespace EforWebApi.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!ProjectExists(id))
+                if (!_context.Projects.Any(p => p.ProjectId == id))
                 {
                     return NotFound();
                 }
@@ -74,7 +97,6 @@ namespace EforWebApi.Controllers
                     throw;
                 }
             }
-
             return NoContent();
         }
 
