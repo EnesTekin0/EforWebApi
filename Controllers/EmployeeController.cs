@@ -91,7 +91,7 @@ namespace EforWebApi.Controllers
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception ex)
             {
                 if (!_context.Employees.Any(e => e.EmployeeId == id))
                 {
