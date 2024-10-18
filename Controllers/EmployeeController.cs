@@ -55,6 +55,13 @@ namespace EforWebApi.Controllers
             {
                 return BadRequest("Employee data is null.");
             }
+
+            var existingEmployee = await _context.Employees.FirstOrDefaultAsync(e => e.Email == employeeDto.Email);
+            if (existingEmployee != null)
+            {
+                return BadRequest("An employee with this email already exists.");
+            }
+
             var result = _context.Employees.Add(new Employee {
                 FirstName = employeeDto.FirstName,
                 LastName = employeeDto.LastName,

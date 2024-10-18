@@ -1,6 +1,6 @@
 @EforWebApi_HostAddress = http://localhost:5173
 
-GET {{EforWebApi_HostAddress}}/weatherforecast/
+GET {{EforWebApi_HostAddress}}/
 Accept: application/json
 
 ###
