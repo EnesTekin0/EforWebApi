@@ -9,11 +9,11 @@ namespace EforWebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ProjectControllerr : ControllerBase
+    public class ProjectController : ControllerBase
     {
         private readonly AppDbContext _context;
 
-        public ProjectControllerr(AppDbContext context)
+        public ProjectController(AppDbContext context)
         {
             _context = context;
         }
@@ -60,7 +60,7 @@ namespace EforWebApi.Controllers
                 ProjectName = projectDto.ProjectName,
                 StartDate = projectDto.StartDate,
                 EndDate = projectDto.EndDate,
-                InactiveProjects = projectDto.InactiveProjects
+                ActiveProjects = projectDto.ActiveProjects
             });
             await _context.SaveChangesAsync();
             return Ok(result.Entity);
@@ -80,7 +80,7 @@ namespace EforWebApi.Controllers
             project.ProjectName = projectDto.ProjectName;
             project.StartDate = projectDto.StartDate;
             project.EndDate = projectDto.EndDate;
-            project.InactiveProjects = projectDto.InactiveProjects;
+            project.ActiveProjects = projectDto.ActiveProjects;
 
             try
             {

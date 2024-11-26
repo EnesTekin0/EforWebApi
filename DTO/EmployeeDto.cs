@@ -8,6 +8,6 @@
         public required string Password { get; set; }
         public required string Groups { get; set; }
         public DateTime HireDate { get; set; } = DateTime.Now.ToUniversalTime();
-        public bool InactiveEmployees { get; set; }
+        public bool ActiveEmployees { get; set; }
     }
 }

@@ -9,11 +9,11 @@ namespace EforWebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class EmployeeProjectControllerr : ControllerBase
+    public class EmployeeProjectController : ControllerBase
     {
         private readonly AppDbContext _context;
 
-        public EmployeeProjectControllerr(AppDbContext context)
+        public EmployeeProjectController(AppDbContext context)
         {
             _context = context;
         }
@@ -60,7 +60,6 @@ namespace EforWebApi.Controllers
                 EmployeeId = employeeProjectDto.EmployeeId,
                 ProjectId = employeeProjectDto.ProjectId,
                 EffortGoals = employeeProjectDto.EffortGoals,
-                EffortAmount = employeeProjectDto.EffortAmount,
                 StartDate = employeeProjectDto.StartDate,
                 EndDate = employeeProjectDto.EndDate
             });
@@ -82,7 +81,6 @@ namespace EforWebApi.Controllers
             employeeProject.EmployeeId = employeeProjectDto.EmployeeId;
             employeeProject.ProjectId = employeeProjectDto.ProjectId;
             employeeProject.EffortGoals = employeeProjectDto.EffortGoals;
-            employeeProject.EffortAmount = employeeProjectDto.EffortAmount;
             employeeProject.StartDate = employeeProjectDto.StartDate;
             employeeProject.EndDate = employeeProjectDto.EndDate;
 

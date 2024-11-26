@@ -5,6 +5,6 @@
         public required string ProjectName { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public bool InactiveProjects { get; set; }
+        public bool ActiveProjects { get; set; }
     }
 }

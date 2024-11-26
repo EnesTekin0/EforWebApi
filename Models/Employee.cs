@@ -13,7 +13,7 @@ namespace EforWebApi.Models
         public required string Password { get; set; }
         public required string Groups { get; set; }
         public DateTime HireDate { get; set; }
-        public bool InactiveEmployees { get; set; }
+        public bool ActiveEmployees { get; set; }
 
         public virtual ICollection<EmployeeProject> EmployeeProjects { get; set; } = new List<EmployeeProject>();
     }

@@ -69,7 +69,7 @@ namespace EforWebApi.Controllers
                 Password = employeeDto.Password,
                 Groups = employeeDto.Groups,
                 HireDate = employeeDto.HireDate,
-                InactiveEmployees = employeeDto.InactiveEmployees
+                ActiveEmployees = employeeDto.ActiveEmployees
             });
             await _context.SaveChangesAsync();
             return Ok(result.Entity);
@@ -92,7 +92,7 @@ namespace EforWebApi.Controllers
             employee.Password = employeeDto.Password;
             employee.Groups = employeeDto.Groups;
             employee.HireDate = employeeDto.HireDate;
-            employee.InactiveEmployees = employeeDto.InactiveEmployees;
+            employee.ActiveEmployees = employeeDto.ActiveEmployees;
 
             try
             {

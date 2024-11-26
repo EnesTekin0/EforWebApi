@@ -9,11 +9,11 @@ namespace EforWebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class EffortControllerr : ControllerBase
+    public class EffortController : ControllerBase
     {
         private readonly AppDbContext _context;
 
-        public EffortControllerr(AppDbContext context)
+        public EffortController(AppDbContext context)
         {
             _context = context;
         }
@@ -55,12 +55,12 @@ namespace EforWebApi.Controllers
             {
                 return BadRequest("Employee data is null.");
             }
-            var result=_context.Efforts.Add(new Effort 
+            var result = _context.Efforts.Add(new Effort
             {
-                 EffortDate=effortDto.EffortDate,
-                 MonthlyEffort=effortDto.MonthlyEffort,
-                 EmployeeProjectId=effortDto.EmployeeProjectId 
-             });
+                EffortAmount = effortDto.EffortAmount,
+                EffortDate = effortDto.EffortDate,
+                EmployeeProjectId = effortDto.EmployeeProjectId
+            });
             await _context.SaveChangesAsync();
             return Ok(result.Entity);
         }
@@ -76,8 +76,8 @@ namespace EforWebApi.Controllers
                 return NotFound();
             }
 
+            effort.EffortAmount = effortDto.EffortAmount;
             effort.EffortDate = effortDto.EffortDate;
-            effort.MonthlyEffort = effortDto.MonthlyEffort;
             effort.EmployeeProjectId = effortDto.EmployeeProjectId;
 
             try
