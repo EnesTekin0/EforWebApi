@@ -44,8 +44,38 @@ namespace EforWebApi.Controllers
                 return NotFound();
             }
 
+
+            var epEffort = await _context.EmployeeProjects.FirstOrDefaultAsync();
+            if (epEffort != null)
+            {
+                _ = epEffort.Effort.ToList(); //NEW
+            }
+
             return employeeProject;
         }
+
+
+            // Yeni endpoint: employeeId'ye göre employeeProjects getirme
+            [HttpGet("by-employee/{employeeId}")]
+            public async Task<ActionResult<IEnumerable<EmployeeProject>>> GetEmployeeProjectsByEmployeeId(int employeeId)
+            {
+                if (_context.EmployeeProjects == null)
+                {
+                    return NotFound();
+                }
+
+                var employeeProjects = await _context.EmployeeProjects
+                    .Where(ep => ep.EmployeeId == employeeId)
+                    .ToListAsync();
+
+                if (employeeProjects == null || employeeProjects.Count == 0)
+                {
+                    return NotFound();
+                }
+
+                return employeeProjects;
+            }
+
 
         // POST: api/EmployeeProject
         [HttpPost]
@@ -63,6 +93,12 @@ namespace EforWebApi.Controllers
                 StartDate = employeeProjectDto.StartDate,
                 EndDate = employeeProjectDto.EndDate
             });
+
+            var epEffort = await _context.EmployeeProjects.FirstOrDefaultAsync();
+            if (epEffort != null)
+            {
+                _ = epEffort.Effort.ToList(); //NEW
+            }
             await _context.SaveChangesAsync();
             return Ok(result.Entity);
         }
