@@ -4,6 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using EforWebApi.DTO;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.Extensions.Configuration;
 
 namespace EforWebApi.Controllers
 {
@@ -12,10 +17,12 @@ namespace EforWebApi.Controllers
     public class EmployeeController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IConfiguration _configuration;
 
-        public EmployeeController(AppDbContext appdbcontext)
+        public EmployeeController(AppDbContext appdbcontext, IConfiguration configuration)
         {
             _context = appdbcontext;
+            _configuration = configuration;
         }
 
         // GET: api/Employee
@@ -47,6 +54,50 @@ namespace EforWebApi.Controllers
             return employee;
         }
 
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDTO loginDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var employee = await _context.Employees
+                .FirstOrDefaultAsync(e => e.Email == loginDto.Email && e.Password == loginDto.Password);
+
+            if (employee == null)
+            {
+                return Unauthorized(new { message = "Geçersiz e-posta veya şifre." });
+            }
+
+            var token = GenerateJwtToken(employee);
+            return Ok(new { token });
+        }
+
+        private string GenerateJwtToken(Employee employee)
+        {
+            var claims = new[]
+            {
+                    new Claim(JwtRegisteredClaimNames.Sub, employee.Email),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    new Claim("employeeId", employee.EmployeeId.ToString()) // EmployeeId ekleniyor
+                };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: _configuration["Jwt:Issuer"],
+                audience: _configuration["Jwt:Issuer"],
+                claims: claims,
+                expires: DateTime.Now.AddMinutes(30),
+                signingCredentials: creds);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+
         // POST: api/Employee
         [HttpPost]
         public async Task<ActionResult<Employee>> PostEmployee(EmployeeDto employeeDto)
@@ -62,7 +113,8 @@ namespace EforWebApi.Controllers
                 return BadRequest("An employee with this email already exists.");
             }
 
-            var result = _context.Employees.Add(new Employee {
+            var result = _context.Employees.Add(new Employee
+            {
                 FirstName = employeeDto.FirstName,
                 LastName = employeeDto.LastName,
                 Email = employeeDto.Email,

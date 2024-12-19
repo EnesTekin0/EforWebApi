@@ -1,9 +1,11 @@
 ﻿using EforWebApi.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore; 
 using Microsoft.EntityFrameworkCore;
 
 namespace EforWebApi.Models
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext<ApplicationUser>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
         public DbSet<Employee> Employees { get; set; } = null!;
@@ -13,6 +15,7 @@ namespace EforWebApi.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
             // Employee - EmployeeProject (1 to many)
             modelBuilder.Entity<Employee>()
                 .HasMany(e => e.EmployeeProjects)
