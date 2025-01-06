@@ -15,6 +15,8 @@ namespace EforWebApi.Models
         public DateTime HireDate { get; set; }
         public bool ActiveEmployees { get; set; }
 
+        public string Role { get; set; } = "User";
+
         public virtual ICollection<EmployeeProject> EmployeeProjects { get; set; } = new List<EmployeeProject>();
     }
 }

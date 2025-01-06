@@ -56,6 +56,9 @@ using Microsoft.IdentityModel.Tokens; // Eklendi
 using Microsoft.OpenApi.Models; // Eklendi
 using System.Text; // Eklendi
 using Microsoft.AspNetCore.Authentication.JwtBearer; // Eklendi
+using Microsoft.OpenApi.Any;
+using System;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -101,10 +104,25 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+      .AddJsonOptions(options =>
+      {
+          // Enum dönüþümü için JsonStringEnumConverter ekle
+          options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+      });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
+
 {
+     c.MapType<Role>(() => new OpenApiSchema
+    {
+        Type = "string",
+        Enum = Enum.GetValues(typeof(Role))
+            .Cast<Role>()
+            .Select(e => new OpenApiString(e.ToString()) as IOpenApiAny) // Dönüþüm burada yapýldý
+            .ToList()
+    });
+
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Efor Web API", Version = "v1" }); // Eklendi
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme // Eklendi
     {

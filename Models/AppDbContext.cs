@@ -17,10 +17,16 @@ namespace EforWebApi.Models
         {
             base.OnModelCreating(modelBuilder);
             // Employee - EmployeeProject (1 to many)
+
+
             modelBuilder.Entity<Employee>()
+
                 .HasMany(e => e.EmployeeProjects)
                 .WithOne(ep => ep.Employee)
                 .HasForeignKey(ep => ep.EmployeeId);
+
+                 
+
 
             // Project - EmployeeProject (1 to many)
             modelBuilder.Entity<Project>()
