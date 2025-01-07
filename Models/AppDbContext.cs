@@ -24,9 +24,15 @@ namespace EforWebApi.Models
                 .HasMany(e => e.EmployeeProjects)
                 .WithOne(ep => ep.Employee)
                 .HasForeignKey(ep => ep.EmployeeId);
-
-                 
-
+           
+            modelBuilder.Entity<Project>(entity =>
+            {
+                entity.Property(e => e.GitHubLink).HasMaxLength(255);
+                entity.Property(e => e.JiraLink).HasMaxLength(255);
+                entity.Property(e => e.ProdLink).HasMaxLength(255);
+                entity.Property(e => e.PreProdLink).HasMaxLength(255);
+                entity.Property(e => e.TestLink).HasMaxLength(255);
+            });
 
             // Project - EmployeeProject (1 to many)
             modelBuilder.Entity<Project>()
