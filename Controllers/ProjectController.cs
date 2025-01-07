@@ -49,29 +49,42 @@ namespace EforWebApi.Controllers
 
         // POST: api/Project
         [HttpPost]
-        public async Task<ActionResult<Project>> PostProject(ProjectDto projectDto)
+        public async Task<ActionResult<Project>> PostProject([FromBody] ProjectDto projectDto)
         {
             if (projectDto == null)
             {
-                return BadRequest("Employee data is null.");
+                return BadRequest("Project data is null.");
             }
-            var result = _context.Projects.Add(new Project
+
+            var project = new Project
             {
                 ProjectName = projectDto.ProjectName,
                 StartDate = projectDto.StartDate,
                 EndDate = projectDto.EndDate,
-                ActiveProjects = projectDto.ActiveProjects
-            });
+                ActiveProjects = projectDto.ActiveProjects,
+                GitHubLink = projectDto.GitHubLink,
+                JiraLink = projectDto.JiraLink,
+                ProdLink = projectDto.ProdLink,
+                PreProdLink = projectDto.PreProdLink,
+                TestLink = projectDto.TestLink
+            };
+
+            _context.Projects.Add(project);
             await _context.SaveChangesAsync();
-            return Ok(result.Entity);
+
+            return CreatedAtAction(nameof(GetProject), new { id = project.ProjectId }, project);
         }
 
         // PUT: api/Project/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProject(int id, ProjectDto projectDto)
+        public async Task<IActionResult> PutProject(int id, [FromBody] ProjectDto projectDto)
         {
-            var project = await _context.Projects.FindAsync(id);
+            if (!_context.Projects.Any(p => p.ProjectId == id))
+            {
+                return NotFound();
+            }
 
+            var project = await _context.Projects.FindAsync(id);
             if (project == null)
             {
                 return NotFound();
@@ -81,6 +94,11 @@ namespace EforWebApi.Controllers
             project.StartDate = projectDto.StartDate;
             project.EndDate = projectDto.EndDate;
             project.ActiveProjects = projectDto.ActiveProjects;
+            project.GitHubLink = projectDto.GitHubLink;
+            project.JiraLink = projectDto.JiraLink;
+            project.ProdLink = projectDto.ProdLink;
+            project.PreProdLink = projectDto.PreProdLink;
+            project.TestLink = projectDto.TestLink;
 
             try
             {
@@ -88,7 +106,7 @@ namespace EforWebApi.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!_context.Projects.Any(p => p.ProjectId == id))
+                if (!ProjectExists(id))
                 {
                     return NotFound();
                 }
@@ -97,6 +115,7 @@ namespace EforWebApi.Controllers
                     throw;
                 }
             }
+
             return NoContent();
         }
 

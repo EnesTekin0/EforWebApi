@@ -29,6 +29,27 @@ namespace EforWebApi.Controllers
             return await _context.Efforts.ToListAsync();
         }
 
+
+        // GET: api/Effort/ByWeek/1
+        [HttpGet("ByWeek/{employeeProjectId}/{EffortDate}")]
+        public async Task<ActionResult<IEnumerable<EffortDto>>> GetEffortsByWeek(int employeeProjectId, DateTime EffortDate)
+        {
+            var endDate = EffortDate.AddDays(7);
+            var efforts = await _context.Efforts
+                .Where(e => e.EmployeeProjectId == employeeProjectId && e.EffortDate >= EffortDate && e.EffortDate <= endDate)
+                .Select(e => new EffortDto
+                {
+                    EmployeeProjectId = e.EmployeeProjectId,
+                    EffortDate = e.EffortDate,
+                    EffortAmount = e.EffortAmount 
+                }) .ToListAsync();
+            if (efforts == null || efforts.Count == 0)
+            {
+                return NotFound(); 
+            }
+            return Ok(efforts);
+        }
+
         // GET: api/Effort/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Effort>> GetEffort(int id)
