@@ -1,4 +1,6 @@
-﻿namespace EforWebApi.DTO
+﻿using EforWebApi.Models;
+
+namespace EforWebApi.DTO
 {
     public class EmployeeDto
     {
@@ -9,5 +11,9 @@
         public required string Groups { get; set; }
         public DateTime HireDate { get; set; } = DateTime.Now.ToUniversalTime();
         public bool ActiveEmployees { get; set; }
+
+
+        public string Role { get; set; } = "User";  
+
     }
 }

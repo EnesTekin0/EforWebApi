@@ -9,6 +9,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Configuration;
+using System.Data;
 
 namespace EforWebApi.Controllers
 {
@@ -35,6 +36,7 @@ namespace EforWebApi.Controllers
             }
             return await _context.Employees.ToListAsync();
         }
+       
 
         // GET: api/Employee/5
         [HttpGet("{id}")]
@@ -71,17 +73,22 @@ namespace EforWebApi.Controllers
                 return Unauthorized(new { message = "Geçersiz e-posta veya şifre." });
             }
 
+            var role = employee.Role;
+
             var token = GenerateJwtToken(employee);
             return Ok(new { token });
         }
 
         private string GenerateJwtToken(Employee employee)
         {
+
             var claims = new[]
             {
                     new Claim(JwtRegisteredClaimNames.Sub, employee.Email),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                    new Claim("employeeId", employee.EmployeeId.ToString()) // EmployeeId ekleniyor
+                    new Claim("employeeId", employee.EmployeeId.ToString()),
+
+                    new Claim("role", employee.Role.ToString())
                 };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
@@ -112,6 +119,12 @@ namespace EforWebApi.Controllers
             {
                 return BadRequest("An employee with this email already exists.");
             }
+            Role role;
+    if (!Enum.TryParse(employeeDto.Role.ToString(), true, out role)) 
+    {
+        role = Role.User; 
+    }
+
 
             var result = _context.Employees.Add(new Employee
             {
@@ -121,7 +134,10 @@ namespace EforWebApi.Controllers
                 Password = employeeDto.Password,
                 Groups = employeeDto.Groups,
                 HireDate = employeeDto.HireDate,
-                ActiveEmployees = employeeDto.ActiveEmployees
+                ActiveEmployees = employeeDto.ActiveEmployees,
+
+                Role = role.ToString() 
+
             });
             await _context.SaveChangesAsync();
             return Ok(result.Entity);
@@ -145,12 +161,15 @@ namespace EforWebApi.Controllers
             employee.Groups = employeeDto.Groups;
             employee.HireDate = employeeDto.HireDate;
             employee.ActiveEmployees = employeeDto.ActiveEmployees;
+            var role = Enum.TryParse<Role>(employeeDto.Role.ToString(), out var parsedRole) ? parsedRole : Role.User;
+            employee.Role = role.ToString();
+
 
             try
             {
                 await _context.SaveChangesAsync();
             }
-            catch (Exception ex)
+            catch 
             {
                 if (!_context.Employees.Any(e => e.EmployeeId == id))
                 {
