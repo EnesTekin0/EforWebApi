@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using EforWebApi.DTO;
+using System;
+using System.Threading.Tasks;
+
 
 namespace EforWebApi.Controllers
 {
@@ -29,26 +32,42 @@ namespace EforWebApi.Controllers
             return await _context.Efforts.ToListAsync();
         }
 
-
-        // GET: api/Effort/ByWeek/1
-        [HttpGet("ByWeek/{employeeProjectId}/{EffortDate}")]
-        public async Task<ActionResult<IEnumerable<EffortDto>>> GetEffortsByWeek(int employeeProjectId, DateTime EffortDate)
+        [HttpGet("ByWeek/{employeeProjectId}/{effortDate}")]
+        public async Task<ActionResult<IEnumerable<EffortDto>>> GetEffortsByWeek(int employeeProjectId, DateTime effortDate)
         {
-            var endDate = EffortDate.AddDays(7);
+            var startDate = effortDate.AddDays(-(int)effortDate.DayOfWeek + (int)DayOfWeek.Monday); // Haftanın başlangıcı
+            var endDate = startDate.AddDays(4); // Haftanın sonu
+
+            // Günlük eforları gruplama ve toplama
             var efforts = await _context.Efforts
-                .Where(e => e.EmployeeProjectId == employeeProjectId && e.EffortDate >= EffortDate && e.EffortDate <= endDate)
-                .Select(e => new EffortDto
+                .Where(e => e.EmployeeProjectId == employeeProjectId && e.EffortDate.Date >= startDate && e.EffortDate.Date <= endDate)
+                .GroupBy(e => e.EffortDate.Date) // Tarih bazında gruplandırma
+                .Select(group => new EffortDto
                 {
-                    EmployeeProjectId = e.EmployeeProjectId,
-                    EffortDate = e.EffortDate,
-                    EffortAmount = e.EffortAmount 
-                }) .ToListAsync();
-            if (efforts == null || efforts.Count == 0)
+                    EmployeeProjectId = employeeProjectId,
+                    EffortDate = group.Key, // Grup anahtarı (tarih)
+                    EffortAmount = group.Sum(e => e.EffortAmount) // Aynı güne ait eforların toplamı
+                })
+                .ToListAsync();
+
+            // Haftanın günlerini doldurmak için eksik günleri ekleme
+            var result = new List<EffortDto>();
+
+            for (var date = startDate; date <= endDate; date = date.AddDays(1))
             {
-                return NotFound(); 
+                var dailyEffort = efforts.FirstOrDefault(e => e.EffortDate.Date == date.Date);
+
+                result.Add(new EffortDto
+                {
+                    EmployeeProjectId = employeeProjectId,
+                    EffortDate = date,
+                    EffortAmount = dailyEffort?.EffortAmount ?? 0 // Eğer o gün için efor yoksa 0 göster
+                });
             }
-            return Ok(efforts);
+
+            return Ok(result);
         }
+
 
         // GET: api/Effort/5
         [HttpGet("{id}")]
@@ -68,20 +87,28 @@ namespace EforWebApi.Controllers
             return effort;
         }
 
-        // POST: api/Effort
         [HttpPost]
         public async Task<ActionResult<Effort>> PostEffort(EffortDto effortDto)
         {
             if (effortDto == null)
             {
-                return BadRequest("Employee data is null.");
+                return BadRequest("Effort data is null.");
             }
+
+            // Gelen tarihi UTC olarak kabul ediyoruz
+            var utcEffortDate = DateTime.SpecifyKind(effortDto.EffortDate, DateTimeKind.Utc);
+
+            // UTC'yi Türkiye saati (UTC+3) olarak dönüştürme
+            var turkeyTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Turkey Standard Time");
+            var effortDateInIstanbulTime = TimeZoneInfo.ConvertTimeFromUtc(utcEffortDate, turkeyTimeZone);
+
             var result = _context.Efforts.Add(new Effort
             {
                 EffortAmount = effortDto.EffortAmount,
-                EffortDate = effortDto.EffortDate,
+                EffortDate = effortDateInIstanbulTime, // Türkiye saatiyle kaydediyoruz
                 EmployeeProjectId = effortDto.EmployeeProjectId
             });
+
             await _context.SaveChangesAsync();
             return Ok(result.Entity);
         }

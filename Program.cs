@@ -1,61 +1,10 @@
-//using EforWebApi.Models;
-//using Microsoft.AspNetCore.Identity;
-//using Microsoft.EntityFrameworkCore;
-//using Microsoft.OpenApi.Models;
-
-//var builder = WebApplication.CreateBuilder(args);
-
-//builder.Services.AddControllers();
-
-//builder.Services.AddDbContext<AppDbContext>(options =>
-//    options.UseNpgsql(builder.Configuration.GetConnectionString("AppDbContext")));
-
-//AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
-//AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
-
-//builder.Services.AddCors(options =>
-//{
-//    options.AddPolicy("AllowAllOrigins", policy =>
-//    {
-//        policy.AllowAnyOrigin()
-//              .AllowAnyMethod()
-//              .AllowAnyHeader();
-//    });
-//});
-
-//builder.Services.AddControllers();
-//builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddSwaggerGen();
-
-
-//var app = builder.Build();
-
-//if (app.Environment.IsDevelopment())
-//{
-//    app.UseDeveloperExceptionPage();
-//    app.UseSwagger();
-//    app.UseSwaggerUI();
-
-
-//}
-
-//app.UseRouting();
-//app.UseAuthorization();
-//app.MapControllers();
-//app.UseHttpsRedirection();
-//app.UseCors("AllowAllOrigins");
-
-//app.Run();
-
-
-
 using EforWebApi.Models;
-using Microsoft.AspNetCore.Identity; // Eklendi
+using Microsoft.AspNetCore.Identity; 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens; // Eklendi
-using Microsoft.OpenApi.Models; // Eklendi
-using System.Text; // Eklendi
-using Microsoft.AspNetCore.Authentication.JwtBearer; // Eklendi
+using Microsoft.IdentityModel.Tokens; 
+using Microsoft.OpenApi.Models; 
+using System.Text; 
+using Microsoft.AspNetCore.Authentication.JwtBearer; 
 using Microsoft.OpenApi.Any;
 using System;
 using System.Text.Json.Serialization;
@@ -68,16 +17,16 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("AppDbContext")));
 
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>() // Eklendi
-    .AddEntityFrameworkStores<AppDbContext>() // Eklendi
-    .AddDefaultTokenProviders(); // Eklendi
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>() 
+    .AddEntityFrameworkStores<AppDbContext>() 
+    .AddDefaultTokenProviders(); 
 
-builder.Services.AddAuthentication(options => // Eklendi
+builder.Services.AddAuthentication(options => 
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-.AddJwtBearer(options => // Eklendi
+.AddJwtBearer(options => 
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
@@ -87,12 +36,18 @@ builder.Services.AddAuthentication(options => // Eklendi
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Issuer"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])) // Eklendi
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])) 
     };
 });
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
+
+AppContext.SetSwitch("System.Globalization.Invariant", true);
+TimeZoneInfo turkishTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Turkey Standard Time");
+DateTime turkishNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, turkishTimeZone);
+Console.WriteLine($"Current time in Turkey: {turkishNow}");
+
 
 builder.Services.AddCors(options =>
 {
@@ -123,8 +78,8 @@ builder.Services.AddSwaggerGen(c =>
             .ToList()
     });
 
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Efor Web API", Version = "v1" }); // Eklendi
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme // Eklendi
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Efor Web API", Version = "v1" }); 
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme 
     {
         In = ParameterLocation.Header,
         Description = "Please enter into field the word 'Bearer' following by space and JWT",
@@ -133,7 +88,7 @@ builder.Services.AddSwaggerGen(c =>
         BearerFormat = "JWT",
         Scheme = "Bearer"
     });
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement { // Eklendi
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement { 
     {
         new OpenApiSecurityScheme {
         Reference = new OpenApiReference {
@@ -160,7 +115,7 @@ app.UseHttpsRedirection();
 app.UseRouting();
 app.UseCors("AllowAllOrigins");
 
-app.UseAuthentication(); // Eklendi
+app.UseAuthentication(); 
 app.UseAuthorization();
 
 app.MapControllers();

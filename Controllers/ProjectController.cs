@@ -56,11 +56,20 @@ namespace EforWebApi.Controllers
                 return BadRequest("Project data is null.");
             }
 
+            // Tarihleri UTC formatında al
+            var startDateUtc = DateTime.SpecifyKind(projectDto.StartDate, DateTimeKind.Utc);
+            var endDateUtc = DateTime.SpecifyKind(projectDto.EndDate, DateTimeKind.Utc);
+
+            // UTC'yi Türkiye saati (UTC+3) olarak dönüştürme
+            var turkeyTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Turkey Standard Time");
+            var startDateInIstanbulTime = TimeZoneInfo.ConvertTimeFromUtc(startDateUtc, turkeyTimeZone);
+            //var endDateInIstanbulTime = TimeZoneInfo.ConvertTimeFromUtc(endDateUtc, turkeyTimeZone);
+
             var project = new Project
             {
                 ProjectName = projectDto.ProjectName,
-                StartDate = projectDto.StartDate,
-                EndDate = projectDto.EndDate,
+                StartDate = startDateInIstanbulTime,
+                EndDate = endDateUtc,
                 ActiveProjects = projectDto.ActiveProjects,
                 GitHubLink = projectDto.GitHubLink,
                 JiraLink = projectDto.JiraLink,
@@ -83,7 +92,14 @@ namespace EforWebApi.Controllers
             {
                 return NotFound();
             }
+            // Tarihleri UTC formatında al
+            var startDateUtc = DateTime.SpecifyKind(projectDto.StartDate, DateTimeKind.Utc);
+            var endDateUtc = DateTime.SpecifyKind(projectDto.EndDate, DateTimeKind.Utc);
 
+            // UTC'yi Türkiye saati (UTC+3) olarak dönüştürme
+            var turkeyTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Turkey Standard Time");
+            var startDateInIstanbulTime = TimeZoneInfo.ConvertTimeFromUtc(startDateUtc, turkeyTimeZone);
+            var endDateInIstanbulTime = TimeZoneInfo.ConvertTimeFromUtc(endDateUtc, turkeyTimeZone);
             var project = await _context.Projects.FindAsync(id);
             if (project == null)
             {
@@ -91,8 +107,8 @@ namespace EforWebApi.Controllers
             }
 
             project.ProjectName = projectDto.ProjectName;
-            project.StartDate = projectDto.StartDate;
-            project.EndDate = projectDto.EndDate;
+            project.StartDate = startDateInIstanbulTime;
+            project.EndDate = endDateInIstanbulTime;
             project.ActiveProjects = projectDto.ActiveProjects;
             project.GitHubLink = projectDto.GitHubLink;
             project.JiraLink = projectDto.JiraLink;
