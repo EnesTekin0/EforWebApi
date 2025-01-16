@@ -55,8 +55,53 @@ namespace EforWebApi.Controllers
         }
 
 
-            // Yeni endpoint: employeeId'ye göre employeeProjects getirme
-            [HttpGet("by-employee/{employeeId}")]
+[HttpGet("employee-report/{employeeId}/{year}")]
+public async Task<ActionResult<EmployeeProjectReportDto>> GetEmployeeProjectReport(int employeeId, int year)
+{
+    // Çalışan bilgilerini al
+    var employee = await _context.Employees
+        .Where(e => e.EmployeeId == employeeId)
+        .FirstOrDefaultAsync();
+
+    if (employee == null)
+    {
+        return NotFound("Çalışan bulunamadı.");
+    }
+
+    // Çalışanın projelerini ve effort bilgilerini al
+    var projectEfforts = await _context.EmployeeProjects
+        .Include(ep => ep.Project)
+        .Include(ep => ep.Effort)
+        .Where(ep => ep.EmployeeId == employeeId)
+        .Select(ep => new ProjectEffortDetail
+        {
+            ProjectName = ep.Project.ProjectName,
+            MonthlyEfforts = ep.Effort
+                .Where(e => e.EffortDate.Year == year)
+                .GroupBy(e => e.EffortDate.Month)
+                .Select(g => new MonthlyEffort
+                {
+                    Month = g.Key,
+                    EffortAmount = g.Sum(e => e.EffortAmount)
+                })
+                .ToList()
+        })
+        .ToListAsync();
+
+    var report = new EmployeeProjectReportDto
+    {
+        FirstName = employee.FirstName,
+        LastName = employee.LastName,
+        Projects = projectEfforts
+    };
+
+    return Ok(report);
+}
+
+
+
+        // Yeni endpoint: employeeId'ye göre employeeProjects getirme
+        [HttpGet("by-employee/{employeeId}")]
             public async Task<ActionResult<IEnumerable<EmployeeProject>>> GetEmployeeProjectsByEmployeeId(int employeeId)
             {
                 if (_context.EmployeeProjects == null)
